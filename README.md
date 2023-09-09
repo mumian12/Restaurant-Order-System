@@ -1,1 +1,2 @@
 # Restaurant-Order-System
+The aim of this project is to create a web-based restaurant ordering system that enables customers to effortlessly order their preferred meals from a chosen restaurant outlet. This system will revolutionize the ordering process by eradicating the need for customers to endure long queues or make phone calls to place their orders. Customers will have the convenience of accessing the webpage from any device with an internet connection, including computers, tablets, and smartphones.
