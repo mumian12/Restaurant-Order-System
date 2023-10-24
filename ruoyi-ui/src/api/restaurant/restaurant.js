@@ -1,44 +1,44 @@
 import request from '@/utils/request'
 
-// 查询餐厅信息列表
+// 查询restaurant列表
 export function listRestaurant(query) {
   return request({
-    url: '/ruoyi-restaurant/restaurant/list',
+    url: '/restaurant/restaurant/list',
     method: 'get',
     params: query
   })
 }
 
-// 查询餐厅信息详细
+// 查询restaurant详细
 export function getRestaurant(restaurantId) {
   return request({
-    url: '/ruoyi-restaurant/restaurant/' + restaurantId,
+    url: '/restaurant/restaurant/' + restaurantId,
     method: 'get'
   })
 }
 
-// 新增餐厅信息
+// 新增restaurant
 export function addRestaurant(data) {
   return request({
-    url: '/ruoyi-restaurant/restaurant',
+    url: '/restaurant/restaurant',
     method: 'post',
     data: data
   })
 }
 
-// 修改餐厅信息
+// 修改restaurant
 export function updateRestaurant(data) {
   return request({
-    url: '/ruoyi-restaurant/restaurant',
+    url: '/restaurant/restaurant',
     method: 'put',
     data: data
   })
 }
 
-// 删除餐厅信息
+// 删除restaurant
 export function delRestaurant(restaurantId) {
   return request({
-    url: '/ruoyi-restaurant/restaurant/' + restaurantId,
+    url: '/restaurant/restaurant/' + restaurantId,
     method: 'delete'
   })
 }
