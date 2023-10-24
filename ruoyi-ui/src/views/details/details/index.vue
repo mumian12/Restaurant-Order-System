@@ -1,25 +1,33 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch">
-      <el-form-item label="food type" prop="foodType">
+    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+      <el-form-item label="order id" prop="orderId">
         <el-input
-          v-model="queryParams.foodType"
-          placeholder="input food type"
+          v-model="queryParams.orderId"
+          placeholder="Please input order id"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="restaurant name" prop="restaurantName">
+      <el-form-item label="item id" prop="itemId">
         <el-input
-          v-model="queryParams.restaurantName"
-          placeholder="input restaurant name"
+          v-model="queryParams.itemId"
+          placeholder="Please input item id"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="quantity" prop="quantity">
+        <el-input
+          v-model="queryParams.quantity"
+          placeholder="Please input quantity"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">Search</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">Reset</el-button>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
@@ -31,37 +39,66 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['restaurant:restaurant:add']"
-        >New</el-button>
+          v-hasPermi="['details:details:add']"
+        >新增</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="success"
+          plain
+          icon="el-icon-edit"
+          size="mini"
+          :disabled="single"
+          @click="handleUpdate"
+          v-hasPermi="['details:details:edit']"
+        >修改</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="danger"
+          plain
+          icon="el-icon-delete"
+          size="mini"
+          :disabled="multiple"
+          @click="handleDelete"
+          v-hasPermi="['details:details:remove']"
+        >删除</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="warning"
+          plain
+          icon="el-icon-download"
+          size="mini"
+          @click="handleExport"
+          v-hasPermi="['details:details:export']"
+        >导出</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="restaurantList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="detailsList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="restaurant id" align="center" prop="restaurantId" />
-      <el-table-column label="food type" align="center" prop="foodType" />
-      <el-table-column label="restaurant picture" align="center" prop="restaurantPic" />
-      <el-table-column label="restaurant name" align="center" prop="restaurantName" />
-      <el-table-column label="order number" align="center" prop="orderNum" />
-      <el-table-column label="contact" align="center" prop="contact" />
-      <el-table-column label="restaurant status (0 is open 1 is closed.)" align="center" prop="status" />
-      <el-table-column label="Operation" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="detail id" align="center" prop="detailId" />
+      <el-table-column label="order id" align="center" prop="orderId" />
+      <el-table-column label="item id" align="center" prop="itemId" />
+      <el-table-column label="quantity" align="center" prop="quantity" />
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             size="mini"
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['restaurant:restaurant:edit']"
-          >Modify</el-button>
+            v-hasPermi="['details:details:edit']"
+          >修改</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['restaurant:restaurant:remove']"
-          >Delete</el-button>
+            v-hasPermi="['details:details:remove']"
+          >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -74,23 +111,17 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改restaurant对话框 -->
+    <!-- 添加或修改details对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="food type" prop="foodType">
-          <el-input v-model="form.foodType" placeholder="请输入food type" />
+        <el-form-item label="order id" prop="orderId">
+          <el-input v-model="form.orderId" placeholder="Please input order id" />
         </el-form-item>
-        <el-form-item label="restaurant picture" prop="restaurantPic">
-          <el-input v-model="form.restaurantPic" placeholder="请输入restaurant picture" />
+        <el-form-item label="item id" prop="itemId">
+          <el-input v-model="form.itemId" placeholder="Please input item id" />
         </el-form-item>
-        <el-form-item label="restaurant name" prop="restaurantName">
-          <el-input v-model="form.restaurantName" placeholder="请输入restaurant name" />
-        </el-form-item>
-        <el-form-item label="order number" prop="orderNum">
-          <el-input v-model="form.orderNum" placeholder="请输入order number" />
-        </el-form-item>
-        <el-form-item label="contact" prop="contact">
-          <el-input v-model="form.contact" placeholder="请输入contact" />
+        <el-form-item label="quantity" prop="quantity">
+          <el-input v-model="form.quantity" placeholder="Please input quantity" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -102,10 +133,10 @@
 </template>
 
 <script>
-import { listRestaurant, getRestaurant, delRestaurant, addRestaurant, updateRestaurant } from "@/api/restaurant/restaurant";
+import { listDetails, getDetails, delDetails, addDetails, updateDetails } from "@/api/details/details";
 
 export default {
-  name: "Restaurant",
+  name: "Details",
   data() {
     return {
       // 遮罩层
@@ -120,8 +151,8 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
-      // restaurant表格数据
-      restaurantList: [],
+      // details表格数据
+      detailsList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -130,9 +161,9 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        foodType: null,
-        restaurantName: null,
-        status: null
+        orderId: null,
+        itemId: null,
+        quantity: null
       },
       // 表单参数
       form: {},
@@ -145,11 +176,11 @@ export default {
     this.getList();
   },
   methods: {
-    /** 查询restaurant列表 */
+    /** 查询details列表 */
     getList() {
       this.loading = true;
-      listRestaurant(this.queryParams).then(response => {
-        this.restaurantList = response.rows;
+      listDetails(this.queryParams).then(response => {
+        this.detailsList = response.rows;
         this.total = response.total;
         this.loading = false;
       });
@@ -162,13 +193,10 @@ export default {
     // 表单重置
     reset() {
       this.form = {
-        restaurantId: null,
-        foodType: null,
-        restaurantPic: null,
-        restaurantName: null,
-        orderNum: null,
-        contact: null,
-        status: null
+        detailId: null,
+        orderId: null,
+        itemId: null,
+        quantity: null
       };
       this.resetForm("form");
     },
@@ -184,7 +212,7 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.restaurantId)
+      this.ids = selection.map(item => item.detailId)
       this.single = selection.length!==1
       this.multiple = !selection.length
     },
@@ -192,30 +220,30 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
-      this.title = "添加restaurant";
+      this.title = "添加details";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      const restaurantId = row.restaurantId || this.ids
-      getRestaurant(restaurantId).then(response => {
+      const detailId = row.detailId || this.ids
+      getDetails(detailId).then(response => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改restaurant";
+        this.title = "修改details";
       });
     },
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          if (this.form.restaurantId != null) {
-            updateRestaurant(this.form).then(response => {
+          if (this.form.detailId != null) {
+            updateDetails(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
               this.getList();
             });
           } else {
-            addRestaurant(this.form).then(response => {
+            addDetails(this.form).then(response => {
               this.$modal.msgSuccess("新增成功");
               this.open = false;
               this.getList();
@@ -226,9 +254,9 @@ export default {
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const restaurantIds = row.restaurantId || this.ids;
-      this.$modal.confirm('是否确认删除restaurant编号为"' + restaurantIds + '"的数据项？').then(function() {
-        return delRestaurant(restaurantIds);
+      const detailIds = row.detailId || this.ids;
+      this.$modal.confirm('是否确认删除details编号为"' + detailIds + '"的数据项？').then(function() {
+        return delDetails(detailIds);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
@@ -236,9 +264,9 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('restaurant/restaurant/export', {
+      this.download('details/details/export', {
         ...this.queryParams
-      }, `restaurant_${new Date().getTime()}.xlsx`)
+      }, `details_${new Date().getTime()}.xlsx`)
     }
   }
 };

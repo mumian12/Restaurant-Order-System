@@ -1,29 +1,32 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="item name" prop="itemName">
+      <el-form-item label="item id" prop="orderId">
         <el-input
-          v-model="queryParams.itemName"
-          placeholder="Please input item name"
+          v-model="queryParams.orderId"
+          placeholder="Please input item id"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="item price" prop="itemPrice">
+      <el-form-item label="user id" prop="userId">
         <el-input
-          v-model="queryParams.itemPrice"
-          placeholder="Please input item price"
+          v-model="queryParams.userId"
+          placeholder="Please input user id"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="item description" prop="itemDescription">
-        <el-input
-          v-model="queryParams.itemDescription"
-          placeholder="Please input item description"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="order time">
+        <el-date-picker
+          v-model="daterangeOrderTime"
+          style="width: 240px"
+          value-format="yyyy-MM-dd"
+          type="daterange"
+          range-separator="-"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+        ></el-date-picker>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -39,7 +42,7 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['item:item:add']"
+          v-hasPermi="['orders:orders:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -50,7 +53,7 @@
           size="mini"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['item:item:edit']"
+          v-hasPermi="['orders:orders:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -61,7 +64,7 @@
           size="mini"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['item:item:remove']"
+          v-hasPermi="['orders:orders:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -71,24 +74,22 @@
           icon="el-icon-download"
           size="mini"
           @click="handleExport"
-          v-hasPermi="['item:item:export']"
+          v-hasPermi="['orders:orders:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="itemList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="ordersList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="item id" align="center" prop="itemId" />
-      <el-table-column label="item picture" align="center" prop="itemPic" width="100">
+      <el-table-column label="item id" align="center" prop="orderId" />
+      <el-table-column label="user id" align="center" prop="userId" />
+      <el-table-column label="order time" align="center" prop="orderTime" width="180">
         <template slot-scope="scope">
-          <image-preview :src="scope.row.itemPic" :width="50" :height="50"/>
+          <span>{{ parseTime(scope.row.orderTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="item name" align="center" prop="itemName" />
-      <el-table-column label="item price" align="center" prop="itemPrice" />
-      <el-table-column label="item description" align="center" prop="itemDescription" />
-      <el-table-column label="order number" align="center" prop="orderNum" />
+      <el-table-column label="order state" align="center" prop="orderState" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -96,14 +97,14 @@
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['item:item:edit']"
+            v-hasPermi="['orders:orders:edit']"
           >修改</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['item:item:remove']"
+            v-hasPermi="['orders:orders:remove']"
           >删除</el-button>
         </template>
       </el-table-column>
@@ -117,23 +118,19 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改item对话框 -->
+    <!-- 添加或修改orders对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="item picture" prop="itemPic">
-          <image-upload v-model="form.itemPic"/>
+        <el-form-item label="user id" prop="userId">
+          <el-input v-model="form.userId" placeholder="Please input user id" />
         </el-form-item>
-        <el-form-item label="item name" prop="itemName">
-          <el-input v-model="form.itemName" placeholder="Please input item name" />
-        </el-form-item>
-        <el-form-item label="item price" prop="itemPrice">
-          <el-input v-model="form.itemPrice" placeholder="Please input item price" />
-        </el-form-item>
-        <el-form-item label="item description" prop="itemDescription">
-          <el-input v-model="form.itemDescription" placeholder="Please input item description" />
-        </el-form-item>
-        <el-form-item label="order number" prop="orderNum">
-          <el-input v-model="form.orderNum" placeholder="Please input order number" />
+        <el-form-item label="order time" prop="orderTime">
+          <el-date-picker clearable
+            v-model="form.orderTime"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="请选择order time">
+          </el-date-picker>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -145,10 +142,10 @@
 </template>
 
 <script>
-import { listItem, getItem, delItem, addItem, updateItem } from "@/api/item/item";
+import { listOrders, getOrders, delOrders, addOrders, updateOrders } from "@/api/orders/orders";
 
 export default {
-  name: "Item",
+  name: "Orders",
   data() {
     return {
       // 遮罩层
@@ -163,19 +160,22 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
-      // item表格数据
-      itemList: [],
+      // orders表格数据
+      ordersList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
       open: false,
+      // order state时间范围
+      daterangeOrderTime: [],
       // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        itemName: null,
-        itemPrice: null,
-        itemDescription: null,
+        orderId: null,
+        userId: null,
+        orderTime: null,
+        orderState: null
       },
       // 表单参数
       form: {},
@@ -188,11 +188,16 @@ export default {
     this.getList();
   },
   methods: {
-    /** 查询item列表 */
+    /** 查询orders列表 */
     getList() {
       this.loading = true;
-      listItem(this.queryParams).then(response => {
-        this.itemList = response.rows;
+      this.queryParams.params = {};
+      if (null != this.daterangeOrderTime && '' != this.daterangeOrderTime) {
+        this.queryParams.params["beginOrderTime"] = this.daterangeOrderTime[0];
+        this.queryParams.params["endOrderTime"] = this.daterangeOrderTime[1];
+      }
+      listOrders(this.queryParams).then(response => {
+        this.ordersList = response.rows;
         this.total = response.total;
         this.loading = false;
       });
@@ -205,12 +210,10 @@ export default {
     // 表单重置
     reset() {
       this.form = {
-        itemId: null,
-        itemPic: null,
-        itemName: null,
-        itemPrice: null,
-        itemDescription: null,
-        orderNum: null
+        orderId: null,
+        userId: null,
+        orderTime: null,
+        orderState: null
       };
       this.resetForm("form");
     },
@@ -221,12 +224,13 @@ export default {
     },
     /** 重置按钮操作 */
     resetQuery() {
+      this.daterangeOrderTime = [];
       this.resetForm("queryForm");
       this.handleQuery();
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.itemId)
+      this.ids = selection.map(item => item.orderId)
       this.single = selection.length!==1
       this.multiple = !selection.length
     },
@@ -234,30 +238,30 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
-      this.title = "添加item";
+      this.title = "添加orders";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      const itemId = row.itemId || this.ids
-      getItem(itemId).then(response => {
+      const orderId = row.orderId || this.ids
+      getOrders(orderId).then(response => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改item";
+        this.title = "修改orders";
       });
     },
     /** 提交按钮 */
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          if (this.form.itemId != null) {
-            updateItem(this.form).then(response => {
+          if (this.form.orderId != null) {
+            updateOrders(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
               this.getList();
             });
           } else {
-            addItem(this.form).then(response => {
+            addOrders(this.form).then(response => {
               this.$modal.msgSuccess("新增成功");
               this.open = false;
               this.getList();
@@ -268,9 +272,9 @@ export default {
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const itemIds = row.itemId || this.ids;
-      this.$modal.confirm('是否确认删除item编号为"' + itemIds + '"的数据项？').then(function() {
-        return delItem(itemIds);
+      const orderIds = row.orderId || this.ids;
+      this.$modal.confirm('是否确认删除orders编号为"' + orderIds + '"的数据项？').then(function() {
+        return delOrders(orderIds);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
@@ -278,9 +282,9 @@ export default {
     },
     /** 导出按钮操作 */
     handleExport() {
-      this.download('item/item/export', {
+      this.download('orders/orders/export', {
         ...this.queryParams
-      }, `item_${new Date().getTime()}.xlsx`)
+      }, `orders_${new Date().getTime()}.xlsx`)
     }
   }
 };
