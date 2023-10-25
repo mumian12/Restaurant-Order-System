@@ -104,7 +104,7 @@
       <CrontabResult :ex="crontabValueString"></CrontabResult>
 
       <div class="pop_btn">
-        <el-button size="small" type="primary" @click="submitFill">确定</el-button>
+        <el-button size="small" type="primary" @click="submitFill"></el-button>
         <el-button size="small" type="warning" @click="clearCron">重置</el-button>
         <el-button size="small" @click="hidePopup">取消</el-button>
       </div>

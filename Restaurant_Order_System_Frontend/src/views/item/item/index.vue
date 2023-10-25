@@ -40,35 +40,13 @@
           size="mini"
           @click="handleAdd"
           v-hasPermi="['item:item:add']"
-        >new</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['item:item:edit']"
-        >modify</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['item:item:remove']"
-        >delete</el-button>
+        >new item</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
+    <!-- 权限待改 -->
     <el-table v-loading="loading" :data="itemList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="item picture" align="center" prop="itemPic" width="100">
         <template slot-scope="scope">
           <image-preview :src="scope.row.itemPic" :width="50" :height="50"/>
@@ -107,14 +85,6 @@
         </template>
       </el-table-column>
     </el-table>
-
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
 
     <el-row style="text-align: right; margin-top: 50px;">
       <el-button type="primary" @click="submitCounters">Submit Order</el-button>
@@ -175,7 +145,7 @@ export default {
       // 查询参数
       queryParams: {
         pageNum: 1,
-        pageSize: 10,
+        pageSize: 1000,
         itemName: null,
         itemPrice: null,
         itemDescription: null,
@@ -284,7 +254,7 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const itemIds = row.itemId || this.ids;
-      this.$modal.confirm('是否确认删除item编号为"' + itemIds + '"的数据项？').then(function() {
+      this.$modal.confirm('Do you want to delete this item?').then(function() {
         return delItem(itemIds);
       }).then(() => {
         this.getList();
