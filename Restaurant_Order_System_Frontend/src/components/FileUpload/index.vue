@@ -18,10 +18,9 @@
       <el-button size="mini" type="primary">选取文件</el-button>
       <!-- 上传提示 -->
       <div class="el-upload__tip" slot="tip" v-if="showTip">
-        请上传
-        <template v-if="fileSize"> 大小不超过 <b style="color: #f56c6c">{{ fileSize }}MB</b> </template>
-        <template v-if="fileType"> 格式为 <b style="color: #f56c6c">{{ fileType.join("/") }}</b> </template>
-        的文件
+        please upload
+        <template v-if="fileSize"> the size of no more than <b style="color: #f56c6c">{{ fileSize }}MB</b> </template>
+        <template v-if="fileType"> File in format <b style="color: #f56c6c">{{ fileType.join("/") }}</b> </template>
       </div>
     </el-upload>
 
@@ -119,7 +118,7 @@ export default {
         const fileExt = fileName[fileName.length - 1];
         const isTypeOk = this.fileType.indexOf(fileExt) >= 0;
         if (!isTypeOk) {
-          this.$modal.msgError(`文件格式不正确, 请上传${this.fileType.join("/")}格式文件!`);
+          this.$modal.msgError(`The file format is incorrect. Please upload the file in format ${this.fileType.join("/")}`);
           return false;
         }
       }
@@ -127,21 +126,21 @@ export default {
       if (this.fileSize) {
         const isLt = file.size / 1024 / 1024 < this.fileSize;
         if (!isLt) {
-          this.$modal.msgError(`上传文件大小不能超过 ${this.fileSize} MB!`);
+          this.$modal.msgError(`The size of the uploaded file cannot exceed ${this.fileSize} MB!`);
           return false;
         }
       }
-      this.$modal.loading("正在上传文件，请稍候...");
+      this.$modal.loading("Uploading, please wait...");
       this.number++;
       return true;
     },
     // 文件个数超出
     handleExceed() {
-      this.$modal.msgError(`上传文件数量不能超过 ${this.limit} 个!`);
+      this.$modal.msgError(`The number of uploaded files cannot exceed  ${this.limit} !`);
     },
     // 上传失败
     handleUploadError(err) {
-      this.$modal.msgError("上传文件失败，请重试");
+      this.$modal.msgError("Upload fail, please try again!");
       this.$modal.closeLoading()
     },
     // 上传成功回调

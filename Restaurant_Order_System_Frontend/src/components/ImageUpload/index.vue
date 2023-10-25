@@ -21,12 +21,11 @@
     </el-upload>
     
     <!-- 上传提示 -->
-    <div class="el-upload__tip" slot="tip" v-if="showTip">
-      请上传
-      <template v-if="fileSize"> 大小不超过 <b style="color: #f56c6c">{{ fileSize }}MB</b> </template>
-      <template v-if="fileType"> 格式为 <b style="color: #f56c6c">{{ fileType.join("/") }}</b> </template>
-      的文件
-    </div>
+      <div class="el-upload__tip" slot="tip" v-if="showTip">
+        please upload
+        <template v-if="fileSize"> the size of no more than <b style="color: #f56c6c">{{ fileSize }}MB</b> </template>
+        <template v-if="fileType"> File in format <b style="color: #f56c6c">{{ fileType.join("/") }}</b> </template>
+      </div>
 
     <el-dialog
       :visible.sync="dialogVisible"
@@ -135,22 +134,22 @@ export default {
       }
 
       if (!isImg) {
-        this.$modal.msgError(`文件格式不正确, 请上传${this.fileType.join("/")}图片格式文件!`);
+        this.$modal.msgError(`File format is not correct, please upload ${this.fileType.join("/")} image format file!`);
         return false;
       }
       if (this.fileSize) {
         const isLt = file.size / 1024 / 1024 < this.fileSize;
         if (!isLt) {
-          this.$modal.msgError(`上传头像图片大小不能超过 ${this.fileSize} MB!`);
+          this.$modal.msgError(`The size of the uploaded profile picture cannot exceed ${this.fileSize} MB!`);
           return false;
         }
       }
-      this.$modal.loading("正在上传图片，请稍候...");
+      this.$modal.loading("Uploading pictures, please wait...");
       this.number++;
     },
     // 文件个数超出
     handleExceed() {
-      this.$modal.msgError(`上传文件数量不能超过 ${this.limit} 个!`);
+      this.$modal.msgError(`The number of uploaded files cannot exceed ${this.limit} !`);
     },
     // 上传成功回调
     handleUploadSuccess(res, file) {
@@ -175,7 +174,7 @@ export default {
     },
     // 上传失败
     handleUploadError() {
-      this.$modal.msgError("上传图片失败，请重试");
+      this.$modal.msgError("Upload picture failed, please try again");
       this.$modal.closeLoading();
     },
     // 上传结束处理
