@@ -9,7 +9,7 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="item price" prop="itemPrice">
+      <el-form-item label="item price(S$)" prop="itemPrice">
         <el-input
           v-model="queryParams.itemPrice"
           placeholder="Please input item price"
@@ -75,8 +75,19 @@
         </template>
       </el-table-column>
       <el-table-column label="item name" align="center" prop="itemName" />
-      <el-table-column label="item price" align="center" prop="itemPrice" />
+      <el-table-column label="item price(S$)" align="center" prop="itemPrice" />
       <el-table-column label="item description" align="center" prop="itemDescription" />
+      <el-table-column label="counter" align="center">
+        <template slot-scope="scope">
+          <el-input
+            v-model="scope.row.counter"
+            size="mini"
+            type="number"
+            :min="0"
+            @change="handleCounterChange(scope.row)"
+          ></el-input>
+        </template>
+      </el-table-column>
       <el-table-column label="operation" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -104,6 +115,10 @@
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
+
+    <el-row style="text-align: right; margin-top: 50px;">
+      <el-button type="primary" @click="submitCounters">Submit Order</el-button>
+    </el-row>
 
     <!-- 添加或修改item对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
@@ -138,22 +153,7 @@ import { listItem, getItem, delItem, addItem, updateItem } from "@/api/item/item
 export default {
   name: "Item",
   data() {
-    const n = 4; // 假设 n 是从后端数据库传递的数量
-    const formDatas = Array(n).fill().map(() => ({
-      field106: 0,
-    }));
     return {
-      n,
-      formDatas,
-      rules: {
-        field106: [
-          {
-            required: true,
-            message: "计数器",
-            trigger: "blur",
-          },
-        ],
-      },
       // 遮罩层
       loading: true,
       // 选中数组
@@ -184,11 +184,23 @@ export default {
       form: {},
       // 表单校验
       rules: {
-      }
+      },
+      counters: {}, // 用于存储计数器值的对象
+      submissionData: [] // 用于存储提交内容的数组
     };
   },
   created() {
     this.getList();
+  },
+  computed: {
+    computedItemList() {
+      return this.itemList.map(item => {
+        return {
+          ...item,
+          counter: this.counters[item.itemId] || 0 // 使用 counters 对象中的值，如果不存在则默认为0
+        };
+      });
+    }
   },
   methods: {
     /** 查询item列表 */
@@ -279,6 +291,19 @@ export default {
         this.$modal.msgSuccess("successful delete");
       }).catch(() => {});
     },
+    handleCounterChange(item) {
+    // 更新计数器的值到 counters 对象中
+    this.$set(this.counters, item.itemId, item.counter);
+    },
+    // 提交计数器值不为0的数据(待改)
+    submitCounters() {
+      this.submissionData = this.computedItemList
+        .filter(item => item.counter > 0)
+        .map(item => ({
+          itemName: item.itemName,
+          counter: item.counter
+        }));
+    }
   }
 };
 </script>
