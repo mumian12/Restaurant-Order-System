@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="item id" prop="orderId">
+      <el-form-item label="order id" prop="orderId">
         <el-input
           v-model="queryParams.orderId"
           placeholder="Please input item id"
@@ -82,7 +82,7 @@
 
     <el-table v-loading="loading" :data="ordersList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="item id" align="center" prop="orderId" />
+      <el-table-column label="order id" align="center" prop="orderId" />
       <el-table-column label="user id" align="center" prop="userId" />
       <el-table-column label="order time" align="center" prop="orderTime" width="180">
         <template slot-scope="scope">
@@ -90,7 +90,7 @@
         </template>
       </el-table-column>
       <el-table-column label="order state" align="center" prop="orderState" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="operation" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             size="mini"
