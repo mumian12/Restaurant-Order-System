@@ -1,10 +1,10 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="order id" prop="orderId">
+    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch">
+      <el-form-item label="order state" prop="orderState">
         <el-input
-          v-model="queryParams.orderId"
-          placeholder="Please input item id"
+          v-model="queryParams.orderState"
+          placeholder="Please input order state"
           clearable
           @keyup.enter.native="handleQuery"
         />
