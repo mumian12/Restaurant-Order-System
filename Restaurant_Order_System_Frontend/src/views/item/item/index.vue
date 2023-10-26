@@ -111,6 +111,8 @@
 
 <script>
 import { listItem, getItem, delItem, addItem, updateItem } from "@/api/item/item";
+import { getUserProfile } from "@/api/system/user";
+import { addOrders } from "@/api/orders/orders";
 
 export default {
   name: "Item",
@@ -144,15 +146,20 @@ export default {
       },
       // 表单参数
       form: {},
+      orderInfo: {},
       // 表单校验
       rules: {
       },
       counters: {}, // 用于存储计数器值的对象
-      submissionData: [] // 用于存储提交内容的数组
+      submissionData: [], // 用于存储提交内容的数组
+      currentTime: null,
+      user: {},
+      newOrderId: null
     };
   },
   created() {
     this.getList();
+    this.getUser();
   },
   computed: {
     computedItemList() {
@@ -172,6 +179,11 @@ export default {
         this.itemList = response.rows;
         this.total = response.total;
         this.loading = false;
+      });
+    },
+    getUser() {
+      getUserProfile().then(response => {
+        this.user = response.data;
       });
     },
     // 取消按钮
@@ -234,7 +246,7 @@ export default {
               this.getList();
             });
           } else {
-            addItem(this.form).then(response => {
+            addItem(this.orderInfo).then(response => {
               this.$modal.msgSuccess("successful new");
               this.open = false;
               this.getList();
@@ -257,14 +269,50 @@ export default {
     // 更新计数器的值到 counters 对象中
     this.$set(this.counters, item.itemId, item.counter);
     },
+    // 获取当前时间
+    getCurrentTime() {
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const day = String(currentDate.getDate()).padStart(2, '0');
+      const hours = String(currentDate.getHours()).padStart(2, '0');
+      const minutes = String(currentDate.getMinutes()).padStart(2, '0');
+      const seconds = String(currentDate.getSeconds()).padStart(2, '0');
+      this.currentTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    },
+    // 当前登录用户ID及时间
+    getOrderInfo(){
+      this.orderInfo = {
+        userId: this.user.userId,
+        orderTime: this.currentTime
+      }
+    },
     // 提交计数器值不为0的数据(待改)
     submitCounters() {
-      this.submissionData = this.computedItemList
-        .filter(item => item.counter > 0)
-        .map(item => ({
-          itemName: item.itemName,
-          counter: item.counter
-        }));
+      this.getCurrentTime();
+      this.getOrderInfo();
+
+      // 计算非零计数器的数量
+      const nonZeroCounters = Object.values(this.counters).filter(counter => counter > 0);
+
+      if (nonZeroCounters.length === 0) {
+        this.$modal.msgWarning("未添加菜品");
+      } else {
+        // 执行提交操作
+        addOrders(this.orderInfo).then(response => {
+          this.$modal.msgSuccess("Order creation success");
+          this.newOrderId = response.data.orderId;
+        });
+        console.log("New Order ID:", this.newOrderId);
+
+       /* // 构建提交数据
+        this.submissionData = this.computedItemList
+          .filter(item => item.counter > 0)
+          .map(item => ({
+            itemName: item.itemName,
+            counter: item.counter
+          }));*/
+      }
     }
   }
 };
