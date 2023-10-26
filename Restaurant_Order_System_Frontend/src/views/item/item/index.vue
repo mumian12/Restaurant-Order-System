@@ -9,14 +9,6 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="item price(S$)" prop="itemPrice">
-        <el-input
-          v-model="queryParams.itemPrice"
-          placeholder="Please input item price"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="item description" prop="itemDescription">
         <el-input
           v-model="queryParams.itemDescription"
