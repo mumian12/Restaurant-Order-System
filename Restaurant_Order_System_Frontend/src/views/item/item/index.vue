@@ -301,10 +301,12 @@ export default {
         // 执行提交操作
         addOrders(this.orderInfo).then(response => {
           this.$modal.msgSuccess("Order creation success");
+          console.log(response);
           this.newOrderId = response.data.orderId;
-        });
-        console.log("New Order ID:", this.newOrderId);
+          console.log("New Order ID:", this.newOrderId);
 
+        });
+        
        /* // 构建提交数据
         this.submissionData = this.computedItemList
           .filter(item => item.counter > 0)

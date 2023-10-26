@@ -1,14 +1,6 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch">
-      <el-form-item label="order state" prop="orderState">
-        <el-input
-          v-model="queryParams.orderState"
-          placeholder="Please input order state"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="user id" prop="userId">
         <el-input
           v-model="queryParams.userId"
@@ -17,9 +9,17 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="order state" prop="orderState">
+        <el-input
+          v-model="queryParams.orderState"
+          placeholder="Please input order state"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">search</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">reset</el-button>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
@@ -41,7 +41,8 @@
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['orders:orders:edit']"
-          >修改</el-button>
+            :disabled="scope.row.orderState === 'completed'"
+          >edit state</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -53,6 +54,17 @@
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
+
+    <!-- 添加或修改orders对话框 -->
+    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <span>Are you sure you want to change the order status to Completed?</span>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitForm">yes</el-button>
+        <el-button @click="cancel">cancel</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -162,26 +174,21 @@ export default {
       getOrders(orderId).then(response => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改orders";
+        this.title = "edit orders";
       });
     },
     /** 提交按钮 */
     submitForm() {
+      this.form.orderState = "completed";
       this.$refs["form"].validate(valid => {
         if (valid) {
           if (this.form.orderId != null) {
             updateOrders(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
+              this.$modal.msgSuccess("Modified successfully");
               this.open = false;
               this.getList();
             });
-          } else {
-            addOrders(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
-          }
+          } 
         }
       });
     },
