@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch">
       <el-form-item label="item name" prop="itemName">
         <el-input
           v-model="queryParams.itemName"
@@ -37,15 +37,15 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
+    <!-- 权限待改 -->
     <el-table v-loading="loading" :data="itemList" @selection-change="handleSelectionChange">
-      <el-table-column label="item id" align="center" prop="itemId" />
       <el-table-column label="item picture" align="center" prop="itemPic" width="100">
         <template slot-scope="scope">
           <image-preview :src="scope.row.itemPic" :width="50" :height="50"/>
         </template>
       </el-table-column>
       <el-table-column label="item name" align="center" prop="itemName" />
-      <el-table-column label="item price" align="center" prop="itemPrice" />
+      <el-table-column label="item price(S$)" align="center" prop="itemPrice" />
       <el-table-column label="item description" align="center" prop="itemDescription" />
       <el-table-column label="counter" align="center">
         <template slot-scope="scope">
@@ -84,7 +84,7 @@
 
     <!-- 添加或修改item对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+      <el-form ref="form" :model="form" :rules="rules">
         <el-form-item label="item picture" prop="itemPic">
           <image-upload v-model="form.itemPic"/>
         </el-form-item>
@@ -111,6 +111,8 @@
 
 <script>
 import { listItem, getItem, delItem, addItem, updateItem } from "@/api/item/item";
+import { getUserProfile } from "@/api/system/user";
+import { addOrders } from "@/api/orders/orders";
 
 export default {
   name: "Item",
@@ -144,15 +146,20 @@ export default {
       },
       // 表单参数
       form: {},
+      orderInfo: {},
       // 表单校验
       rules: {
       },
       counters: {}, // 用于存储计数器值的对象
       submissionData: [], // 用于存储提交内容的数组
+      currentTime: null,
+      user: {},
+      newOrderId: null
     };
   },
   created() {
     this.getList();
+    this.getUser();
   },
   computed: {
     computedItemList() {
@@ -172,6 +179,11 @@ export default {
         this.itemList = response.rows;
         this.total = response.total;
         this.loading = false;
+      });
+    },
+    getUser() {
+      getUserProfile().then(response => {
+        this.user = response.data;
       });
     },
     // 取消按钮
@@ -211,7 +223,7 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
-      this.title = "添加item";
+      this.title = "add item";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -220,7 +232,7 @@ export default {
       getItem(itemId).then(response => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改item";
+        this.title = "modify item";
       });
     },
     /** 提交按钮 */
@@ -229,13 +241,13 @@ export default {
         if (valid) {
           if (this.form.itemId != null) {
             updateItem(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
+              this.$modal.msgSuccess("successful modify");
               this.open = false;
               this.getList();
             });
           } else {
-            addItem(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
+            addItem(this.orderInfo).then(response => {
+              this.$modal.msgSuccess("successful new");
               this.open = false;
               this.getList();
             });
@@ -246,17 +258,64 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const itemIds = row.itemId || this.ids;
-      this.$modal.confirm('是否确认删除item编号为"' + itemIds + '"的数据项？').then(function() {
+      this.$modal.confirm('Do you want to delete this item?').then(function() {
         return delItem(itemIds);
       }).then(() => {
         this.getList();
-        this.$modal.msgSuccess("删除成功");
+        this.$modal.msgSuccess("successful delete");
       }).catch(() => {});
     },
     handleCounterChange(item) {
     // 更新计数器的值到 counters 对象中
     this.$set(this.counters, item.itemId, item.counter);
     },
+    // 获取当前时间
+    getCurrentTime() {
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const day = String(currentDate.getDate()).padStart(2, '0');
+      const hours = String(currentDate.getHours()).padStart(2, '0');
+      const minutes = String(currentDate.getMinutes()).padStart(2, '0');
+      const seconds = String(currentDate.getSeconds()).padStart(2, '0');
+      this.currentTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    },
+    // 当前登录用户ID及时间
+    getOrderInfo(){
+      this.orderInfo = {
+        userId: this.user.userId,
+        orderTime: this.currentTime
+      }
+    },
+    // 提交计数器值不为0的数据(待改)
+    submitCounters() {
+      this.getCurrentTime();
+      this.getOrderInfo();
+
+      // 计算非零计数器的数量
+      const nonZeroCounters = Object.values(this.counters).filter(counter => counter > 0);
+
+      if (nonZeroCounters.length === 0) {
+        this.$modal.msgWarning("未添加菜品");
+      } else {
+        // 执行提交操作
+        addOrders(this.orderInfo).then(response => {
+          this.$modal.msgSuccess("Order creation success");
+          console.log(response);
+          this.newOrderId = response.data.orderId;
+          console.log("New Order ID:", this.newOrderId);
+
+        });
+        
+       /* // 构建提交数据
+        this.submissionData = this.computedItemList
+          .filter(item => item.counter > 0)
+          .map(item => ({
+            itemName: item.itemName,
+            counter: item.counter
+          }));*/
+      }
+    }
   }
 };
 </script>

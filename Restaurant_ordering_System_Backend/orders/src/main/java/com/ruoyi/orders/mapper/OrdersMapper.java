@@ -34,6 +34,12 @@ public interface OrdersMapper
      * @return 结果
      */
     public int insertOrders(Orders orders);
+    // public Orders insertOrders(Orders orders) {
+    //     // 插入订单逻辑...
+    //     // 插入后查询数据库以获取新插入的数据
+    //     Orders insertedOrder = ordersMapper.selectOrdersByOrderId(orders.getOrderId());
+    //     return insertedOrder;
+    // }
 
     /**
      * 修改orders

@@ -33,7 +33,7 @@ public interface IOrdersService
      * @param orders orders
      * @return 结果
      */
-    public int insertOrders(Orders orders);
+    public Orders insertOrders(Orders orders);
 
     /**
      * 修改orders
