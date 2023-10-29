@@ -32,9 +32,9 @@
           size="mini"
           @click="handleAdd"
           v-hasPermi="['item:item:add']"
+          v-if="user.userId ===1"
         >new item</el-button>
       </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
     <!-- 权限待改 -->
@@ -47,7 +47,7 @@
       <el-table-column label="item name" align="center" prop="itemName" />
       <el-table-column label="item price(S$)" align="center" prop="itemPrice" />
       <el-table-column label="item description" align="center" prop="itemDescription" />
-      <el-table-column label="counter" align="center">
+      <el-table-column label="counter" align="center" v-if="user.userId != 1">
         <template slot-scope="scope">
           <el-input
             v-model="scope.row.counter"
@@ -58,7 +58,7 @@
           ></el-input>
         </template>
       </el-table-column>
-      <el-table-column label="operation" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="operation" align="center" class-name="small-padding fixed-width" v-if="user.userId ===1">
         <template slot-scope="scope">
           <el-button
             size="mini"
@@ -79,7 +79,7 @@
     </el-table>
 
     <el-row style="text-align: right; margin-top: 50px;">
-      <el-button type="primary" @click="submitCounters">Submit Order</el-button>
+      <el-button type="primary" @click="submitCounters" v-if="user.userId != 1">Submit Order</el-button>
     </el-row>
 
     <!-- 添加或修改item对话框 -->
@@ -112,7 +112,9 @@
 <script>
 import { listItem, getItem, delItem, addItem, updateItem } from "@/api/item/item";
 import { getUserProfile } from "@/api/system/user";
-import { addOrders } from "@/api/orders/orders";
+import { addOrders, getOrders } from "@/api/orders/orders";
+import {addDetails} from "@/api/details/details";
+
 
 export default {
   name: "Item",
@@ -288,34 +290,101 @@ export default {
       }
     },
     // 提交计数器值不为0的数据(待改)
-    submitCounters() {
+    // submitCounters() {
+    //   this.getCurrentTime();
+    //   this.getOrderInfo();
+    //
+    //   // 计算非零计数器的数量
+    //   const nonZeroCounters = Object.values(this.counters).filter(counter => counter > 0);
+    //
+    //   if (nonZeroCounters.length === 0) {
+    //     this.$modal.msgWarning("Dishes unadded");
+    //   } else {
+    //     // 执行提交操作
+    //     addOrders(this.orderInfo).then(response => {
+    //       this.$modal.msgSuccess("Order creation success");
+    //       console.log(response);
+    //       this.newOrderId = response.orderId;
+    //       console.log("New Order ID:", this.newOrderId);
+    //
+    //     });
+    //
+    //     //构建提交数据
+    //     this.submissionData = this.computedItemList
+    //       .filter(item => item.counter > 0)
+    //       .map(item => ({
+    //         itemId: item.itemId,
+    //         counter: item.counter
+    //       }));
+    //     console.log(this.submissionData);
+    //
+    //     //分条加入details表
+    //     for (let i = 0; i < this.submissionData.length; i++) {
+    //       const item = this.submissionData[i];
+    //       const detailInfo = {
+    //         orderId: this.newOrderId,
+    //         itemId: item.itemId,
+    //         quantity: item.counter
+    //       };
+    //       addDetails(detailInfo).then(response => {
+    //         this.$modal.msgSuccess("Details creation success");
+    //         console.log(response);
+    //         // this.newOrderId = response.orderId;
+    //         // console.log("New Order ID:", this.newOrderId);
+    //
+    //       });
+    //       console.log('Counter:', item.counter);
+    //       console.log('Item Name:', item.itemId);
+    //     }
+    //   }
+    // }
+    async submitCounters() {
       this.getCurrentTime();
       this.getOrderInfo();
 
-      // 计算非零计数器的数量
       const nonZeroCounters = Object.values(this.counters).filter(counter => counter > 0);
 
       if (nonZeroCounters.length === 0) {
         this.$modal.msgWarning("未添加菜品");
       } else {
-        // 执行提交操作
-        addOrders(this.orderInfo).then(response => {
+        try {
+          // 执行提交操作
+          const response = await addOrders(this.orderInfo);
           this.$modal.msgSuccess("Order creation success");
           console.log(response);
-          this.newOrderId = response.data.orderId;
+          this.newOrderId = response.orderId;
           console.log("New Order ID:", this.newOrderId);
 
-        });
-        
-       /* // 构建提交数据
-        this.submissionData = this.computedItemList
-          .filter(item => item.counter > 0)
-          .map(item => ({
-            itemName: item.itemName,
-            counter: item.counter
-          }));*/
+          // 构建提交数据
+          this.submissionData = this.computedItemList
+            .filter(item => item.counter > 0)
+            .map(item => ({
+              itemId: item.itemId,
+              counter: item.counter
+            }));
+          console.log(this.submissionData);
+
+          // 分条加入details表
+          for (let i = 0; i < this.submissionData.length; i++) {
+            const item = this.submissionData[i];
+            const detailInfo = {
+              orderId: this.newOrderId,
+              itemId: item.itemId,
+              quantity: item.counter
+            };
+            const detailResponse = await addDetails(detailInfo);
+            this.$modal.msgSuccess("Details creation success");
+            console.log(detailResponse);
+            console.log('Counter:', item.counter);
+            console.log('Item Name:', item.itemId);
+          }
+        } catch (error) {
+          // 处理错误
+          console.error("An error occurred:", error);
+        }
       }
     }
+
   }
 };
 </script>

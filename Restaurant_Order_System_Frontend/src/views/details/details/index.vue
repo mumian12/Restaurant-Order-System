@@ -38,14 +38,6 @@
       <el-table-column label="item id" align="center" prop="itemId" />
       <el-table-column label="quantity" align="center" prop="quantity" />
     </el-table>
-    
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
 
   </div>
 </template>
@@ -78,7 +70,7 @@ export default {
       // 查询参数
       queryParams: {
         pageNum: 1,
-        pageSize: 10,
+        pageSize: 1000,
         orderId: null,
         itemId: null,
         quantity: null

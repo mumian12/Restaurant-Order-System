@@ -1,14 +1,14 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch">
-      <el-form-item label="user id" prop="userId">
-        <el-input
-          v-model="queryParams.userId"
-          placeholder="Please input user id"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
+<!--      <el-form-item label="user id" prop="userId">-->
+<!--        <el-input-->
+<!--          v-model="queryParams.userId"-->
+<!--          placeholder="Please input user id"-->
+<!--          clearable-->
+<!--          @keyup.enter.native="handleQuery"-->
+<!--        />-->
+<!--      </el-form-item>-->
       <el-form-item label="order state" prop="orderState">
         <el-input
           v-model="queryParams.orderState"
@@ -42,7 +42,15 @@
             @click="handleUpdate(scope.row)"
             v-hasPermi="['orders:orders:edit']"
             :disabled="scope.row.orderState === 'completed'"
+            v-if="user.userId === 1"
           >edit state</el-button>
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-view"
+            @click="viewDetails(scope.row)"
+            v-hasPermi="['orders:orders:view']"
+          >view details</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -57,11 +65,22 @@
         <el-button @click="cancel">cancel</el-button>
       </div>
     </el-dialog>
+    <el-dialog :title="title" :visible.sync="openView" width="500px" append-to-body>
+      <el-table v-loading="loading" :data="detailsList">
+        <el-table-column label="detail id" align="center" prop="detailId" />
+        <el-table-column label="order id" align="center" prop="orderId" />
+        <el-table-column label="item id" align="center" prop="itemId" />
+        <el-table-column label="quantity" align="center" prop="quantity" />
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { listOrders, getOrders, delOrders, addOrders, updateOrders } from "@/api/orders/orders";
+import {getUserProfile} from "@/api/system/user";
+import { listDetails} from "@/api/details/details";
+
 
 export default {
   name: "Orders",
@@ -85,6 +104,7 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      openView: false,
       // order state时间范围
       daterangeOrderTime: [],
       // 查询参数
@@ -96,21 +116,32 @@ export default {
         orderTime: null,
         orderState: null
       },
+      queryDetails: {
+        orderId: null,
+        itemId: null,
+        quantity: null
+      },
       // 表单参数
       form: {},
       // 表单校验
       rules: {
-      }
+      },
+      user: {},
+      detailsList: []
     };
   },
   created() {
-    this.getList();
+    this.getUser();
   },
   methods: {
     /** 查询orders列表 */
     getList() {
       this.loading = true;
       this.queryParams.params = {};
+      if(this.user.userId != 1){
+        this.queryParams.userId = this.user.userId;
+      }
+
       if (null != this.daterangeOrderTime && '' != this.daterangeOrderTime) {
         this.queryParams.params["beginOrderTime"] = this.daterangeOrderTime[0];
         this.queryParams.params["endOrderTime"] = this.daterangeOrderTime[1];
@@ -119,6 +150,12 @@ export default {
         this.ordersList = response.rows;
         this.total = response.total;
         this.loading = false;
+      });
+    },
+    getUser() {
+      getUserProfile().then(response => {
+        this.user = response.data;
+        this.getList();
       });
     },
     // 取消按钮
@@ -169,6 +206,17 @@ export default {
         this.title = "edit orders";
       });
     },
+    // 查看订单详情
+    viewDetails(row){
+      this.reset();
+      const orderId = row.orderId || this.ids;
+      this.queryDetails.orderId = orderId;
+      listDetails(this.queryDetails).then(response => {
+        this.detailsList = response.rows;
+        this.openView = true;
+        this.title = "view details";
+      })
+    },
     /** 提交按钮 */
     submitForm() {
       this.form.orderState = "completed";
@@ -180,7 +228,7 @@ export default {
               this.open = false;
               this.getList();
             });
-          } 
+          }
         }
       });
     },
