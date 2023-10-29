@@ -111,6 +111,9 @@
 
 <script>
 import { listItem, getItem, delItem, addItem, updateItem } from "@/api/item/item";
+import { getUserProfile } from "@/api/system/user";
+import { addOrders } from "@/api/orders/orders";
+import {addDetails} from "@/api/details/details";
 
 export default {
   name: "Item",
@@ -149,10 +152,14 @@ export default {
       },
       counters: {}, // 用于存储计数器值的对象
       submissionData: [], // 用于存储提交内容的数组
+      currentTime: null,
+      user: {},
+      newOrderId: null
     };
   },
   created() {
     this.getList();
+    this.getUser();
   },
   computed: {
     computedItemList() {
@@ -172,6 +179,11 @@ export default {
         this.itemList = response.rows;
         this.total = response.total;
         this.loading = false;
+      });
+    },
+    getUser() {
+      getUserProfile().then(response => {
+        this.user = response.data;
       });
     },
     // 取消按钮
@@ -257,6 +269,70 @@ export default {
     // 更新计数器的值到 counters 对象中
     this.$set(this.counters, item.itemId, item.counter);
     },
+    getCurrentTime() {
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+      const day = String(currentDate.getDate()).padStart(2, '0');
+      const hours = String(currentDate.getHours()).padStart(2, '0');
+      const minutes = String(currentDate.getMinutes()).padStart(2, '0');
+      const seconds = String(currentDate.getSeconds()).padStart(2, '0');
+      this.currentTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    },
+    // 当前登录用户ID及时间
+    getOrderInfo(){
+      this.orderInfo = {
+        userId: this.user.userId,
+        orderTime: this.currentTime
+      }
+    },
+    async submitCounters() {
+      this.getCurrentTime();
+      this.getOrderInfo();
+
+      const nonZeroCounters = Object.values(this.counters).filter(counter => counter > 0);
+
+      if (nonZeroCounters.length === 0) {
+        this.$modal.msgWarning("未添加菜品");
+      } else {
+        try {
+          // 执行提交操作
+          const response = await addOrders(this.orderInfo);
+          this.$modal.msgSuccess("Order creation success");
+          console.log(response);
+          this.newOrderId = response.orderId;
+          console.log("New Order ID:", this.newOrderId);
+
+          // 构建提交数据
+          this.submissionData = this.computedItemList
+            .filter(item => item.counter > 0)
+            .map(item => ({
+              itemId: item.itemId,
+              counter: item.counter
+            }));
+          console.log(this.submissionData);
+
+          // 分条加入details表
+          for (let i = 0; i < this.submissionData.length; i++) {
+            const item = this.submissionData[i];
+            const detailInfo = {
+              orderId: this.newOrderId,
+              itemId: item.itemId,
+              quantity: item.counter
+            };
+            const detailResponse = await addDetails(detailInfo);
+            this.$modal.msgSuccess("Details creation success");
+            console.log(detailResponse);
+            console.log('Counter:', item.counter);
+            console.log('Item Name:', item.itemId);
+          }
+        } catch (error) {
+          // 处理错误
+          console.error("An error occurred:", error);
+        }
+      }
+    }
+
   }
 };
 </script>
