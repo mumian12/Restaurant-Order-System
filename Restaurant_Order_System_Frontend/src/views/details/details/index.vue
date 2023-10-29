@@ -32,7 +32,6 @@
     </el-form>
 
     <el-table v-loading="loading" :data="detailsList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="detail id" align="center" prop="detailId" />
       <el-table-column label="order id" align="center" prop="orderId" />
       <el-table-column label="item id" align="center" prop="itemId" />
@@ -126,58 +125,6 @@ export default {
       this.single = selection.length!==1
       this.multiple = !selection.length
     },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset();
-      this.open = true;
-      this.title = "添加details";
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset();
-      const detailId = row.detailId || this.ids
-      getDetails(detailId).then(response => {
-        this.form = response.data;
-        this.open = true;
-        this.title = "修改details";
-      });
-    },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.detailId != null) {
-            updateDetails(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            });
-          } else {
-            addDetails(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
-          }
-        }
-      });
-    },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const detailIds = row.detailId || this.ids;
-      this.$modal.confirm('是否确认删除details编号为"' + detailIds + '"的数据项？').then(function() {
-        return delDetails(detailIds);
-      }).then(() => {
-        this.getList();
-        this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
-    },
-    /** 导出按钮操作 */
-    handleExport() {
-      this.download('details/details/export', {
-        ...this.queryParams
-      }, `details_${new Date().getTime()}.xlsx`)
-    }
   }
 };
 </script>

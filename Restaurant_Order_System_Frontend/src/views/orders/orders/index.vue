@@ -190,12 +190,6 @@ export default {
       this.single = selection.length!==1
       this.multiple = !selection.length
     },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset();
-      this.open = true;
-      this.title = "添加orders";
-    },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
@@ -235,11 +229,11 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const orderIds = row.orderId || this.ids;
-      this.$modal.confirm('是否确认删除orders编号为"' + orderIds + '"的数据项？').then(function() {
+      this.$modal.confirm('Do you want to delete the data item whose orders number is"' + orderIds + '"').then(function() {
         return delOrders(orderIds);
       }).then(() => {
         this.getList();
-        this.$modal.msgSuccess("删除成功");
+        this.$modal.msgSuccess("Delete Successfully");
       }).catch(() => {});
     },
     /** 导出按钮操作 */

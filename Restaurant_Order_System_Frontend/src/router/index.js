@@ -87,6 +87,21 @@ export const constantRoutes = [
         meta: { title: 'Individual center', icon: 'user' }
       }
     ]
+  },
+  {
+    path: '/item', // 新路由的路径，可以根据需求自定义
+    component: Layout, // 使用的布局组件
+    hidden: false,
+    redirect: '/item', // 默认重定向到新路由的子路由
+    children: [
+      {
+        path: 'index', // 子路由的路径
+        component: () => import('@/views/item/item/index'), // 对应的组件
+        name: 'item', // 子路由的名称
+        meta: { title: 'Item', icon: 'item' } // 子路由的元信息
+      }
+      // 可以添加更多子路由或者嵌套路由
+    ]
   }
 ]
 
