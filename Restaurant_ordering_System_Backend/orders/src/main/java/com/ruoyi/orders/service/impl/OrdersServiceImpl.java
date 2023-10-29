@@ -50,9 +50,19 @@ public class OrdersServiceImpl implements IOrdersService
      * @return 结果
      */
     @Override
-    public int insertOrders(Orders orders)
-    {
-        return ordersMapper.insertOrders(orders);
+    // public int insertOrders(Orders orders)
+    // {
+    //     return ordersMapper.insertOrders(orders);
+    // }
+    public Orders insertOrders(Orders orders) {
+        int result = ordersMapper.insertOrders(orders);
+        if (result > 0) {
+            // Insertion successful, return the inserted order data
+            return orders;
+        } else {
+            // Insertion failed, return null or throw an exception
+            return null;
+        }
     }
 
     /**

@@ -75,9 +75,12 @@ public class OrdersController extends BaseController
     @PreAuthorize("@ss.hasPermi('orders:orders:add')")
     @Log(title = "orders", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody Orders orders)
-    {
-        return toAjax(ordersService.insertOrders(orders));
+    // public AjaxResult add(@RequestBody Orders orders)
+    // {
+    //     return toAjax(ordersService.insertOrders(orders));
+    // }
+    public Orders add(@RequestBody Orders orders) {
+        return ordersService.insertOrders(orders);
     }
 
     /**
