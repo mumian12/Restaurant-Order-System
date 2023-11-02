@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package com.ruoyi.item;
+
+service ItemService {
+  rpc GetItem (ItemRequest) returns (ItemResponse);
+  rpc ListItem (ItemRequest) returns (ItemResponse);
+  rpc ExportItem (ItemRequest) returns (ItemResponse);
+  rpc AddItem (ItemRequest) returns (ItemResponse);
+  rpc EditItem (ItemRequest) returns (ItemResponse);
+  rpc RemoveItem (ItemRequest) returns (ItemResponse);
+
+
+}
+
+message ItemRequest {
+  int64 item_id = 1;
+}
+
+message ItemResponse {
+  int64 item_id = 1;
+  string item_pic = 2;
+  string item_name = 3;
+  double item_price = 4;
+  string item_description = 5;
+  int32 order_num = 6;
+}
