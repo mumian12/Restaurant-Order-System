@@ -2,6 +2,7 @@ package com.ruoyi.orders.mapper;
 
 import java.util.List;
 import com.ruoyi.orders.domain.Orders;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * ordersMapper接口
@@ -9,6 +10,7 @@ import com.ruoyi.orders.domain.Orders;
  * @author group14
  * @date 2023-10-24
  */
+@Mapper
 public interface OrdersMapper 
 {
     /**

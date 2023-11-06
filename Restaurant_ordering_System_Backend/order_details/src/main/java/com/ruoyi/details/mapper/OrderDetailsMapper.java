@@ -2,6 +2,7 @@ package com.ruoyi.details.mapper;
 
 import java.util.List;
 import com.ruoyi.details.domain.OrderDetails;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * detailsMapper接口
@@ -9,6 +10,7 @@ import com.ruoyi.details.domain.OrderDetails;
  * @author group14
  * @date 2023-10-24
  */
+@Mapper
 public interface OrderDetailsMapper 
 {
     /**

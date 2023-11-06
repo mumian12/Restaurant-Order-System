@@ -2,6 +2,7 @@ package com.ruoyi.item.mapper;
 
 import java.util.List;
 import com.ruoyi.item.domain.Item;
+import org.apache.ibatis.annotations.Mapper;
 
 /**
  * itemMapper接口
@@ -9,6 +10,7 @@ import com.ruoyi.item.domain.Item;
  * @author group14
  * @date 2023-10-24
  */
+@Mapper
 public interface ItemMapper 
 {
     /**
