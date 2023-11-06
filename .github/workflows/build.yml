@@ -69,7 +69,6 @@ jobs:
       - name: Deploy
         run: |
           cd Restaurant_Order_System_Frontend
-        # chmod +x node_modules/.bin/vue-cli-service
           npm run build:prod
           echo "begin copy html "
           cp -r ../Restaurant_Order_System_Frontend/dist/** ../docker/nginx/html/dist
