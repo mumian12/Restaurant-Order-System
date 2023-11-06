@@ -80,7 +80,6 @@ jobs:
           chmod +x ./copy.sh
           ./copy.sh
           
-
       - name: Setup SSH and SCP
         run: |
           mkdir -p ~/.ssh/
