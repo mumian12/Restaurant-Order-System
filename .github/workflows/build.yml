@@ -66,7 +66,7 @@ jobs:
           release_name: ${{ steps.changelog.outputs.tag }}
           body: ${{ steps.changelog.outputs.clean_changelog }}
 
-      - name: Deploy
+      - name: Build with Vuejs
         run: |
           cd ruoyi-ui
           npm run build:prod
@@ -76,9 +76,9 @@ jobs:
       - name: Build with Maven
         run: |
           mvn clean package
-          cd docker
-          chmod +x ./copy.sh
-          ./copy.sh
+          echo "begin copy ruoyi-admin "
+          cp ../ruoyi-admin/target/ruoyi-admin.jar ./ruoyi-admin/jar
+          
 
       - name: Setup SSH and SCP
         run: |
