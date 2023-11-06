@@ -1,4 +1,4 @@
-name: Restaurant-Order-System-Cloud
+name: Restaurant-Order-System
 on:
   push:
     branches:
@@ -35,7 +35,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          cd Restaurant_Order_System_Frontend
+          cd ruoyi-ui
           npm install
         # npm install is-mergeable-object
         # npm update deepmerge
@@ -68,10 +68,10 @@ jobs:
 
       - name: Deploy
         run: |
-          cd Restaurant_Order_System_Frontend
+          cd ruoyi-ui
           npm run build:prod
           echo "begin copy html "
-          cp -r ../Restaurant_Order_System_Frontend/dist/** ../docker/nginx/html/dist
+          cp -r ../ruoyi-ui/dist/** ../docker/nginx/html/dist
 
       - name: Build with Maven
         run: |

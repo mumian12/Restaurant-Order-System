@@ -36,7 +36,7 @@ services:
           '--lower-case-table-names=1'
         ]
     environment:
-      MYSQL_DATABASE: 'ry-cloud'
+      MYSQL_DATABASE: 'rostest'
       MYSQL_ROOT_PASSWORD: password
   ruoyi-redis:
     container_name: ruoyi-redis
@@ -62,20 +62,20 @@ services:
       - ./nginx/logs:/var/log/nginx
       - ./nginx/conf.d:/etc/nginx/conf.d
     depends_on:
-      - ruoyi-gateway
+      - ruoyi-admin
     links:
-      - ruoyi-gateway
-  ruoyi-gateway:
-    container_name: ruoyi-gateway
-    build:
-      context: ./ruoyi/gateway
-      dockerfile: dockerfile
-    ports:
-      - "8080:8080"
-    depends_on:
-      - ruoyi-redis
-    links:
-      - ruoyi-redis
+      - ruoyi-admin
+  # ruoyi-gateway:
+  #   container_name: ruoyi-gateway
+  #   build:
+  #     context: ./ruoyi/gateway
+  #     dockerfile: dockerfile
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     - ruoyi-redis
+  #   links:
+  #     - ruoyi-redis
   # ruoyi-auth:
   #   container_name: ruoyi-auth
   #   build:
@@ -122,22 +122,22 @@ services:
   #     - ruoyi-mysql
   #   links:
   #     - ruoyi-mysql
-  ruoyi-modules-file:
-    container_name: ruoyi-modules-file
-    build:
-      context: ./ruoyi/modules/file
-      dockerfile: dockerfile
-    ports:
-      - "9300:9300"
-    volumes:
-    - ./ruoyi/uploadPath:/home/ruoyi/uploadPath
-  ruoyi-visual-monitor:
-    container_name: ruoyi-visual-monitor
-    build:
-      context: ./ruoyi/visual/monitor
-      dockerfile: dockerfile
-    ports:
-      - "9100:9100"
+  # ruoyi-modules-file:
+  #   container_name: ruoyi-modules-file
+  #   build:
+  #     context: ./ruoyi/modules/file
+  #     dockerfile: dockerfile
+  #   ports:
+  #     - "9300:9300"
+  #   volumes:
+  #   - ./ruoyi/uploadPath:/home/ruoyi/uploadPath
+  # ruoyi-visual-monitor:
+  #   container_name: ruoyi-visual-monitor
+  #   build:
+  #     context: ./ruoyi/visual/monitor
+  #     dockerfile: dockerfile
+  #   ports:
+  #     - "9100:9100"
   ruoyi-admin:
     container_name: restaurant-order-system
     build:
