@@ -76,8 +76,9 @@ jobs:
       - name: Build with Maven
         run: |
           mvn clean package
-          echo "begin copy ruoyi-admin "
-          cp ../ruoyi-admin/target/ruoyi-admin.jar ./ruoyi-admin/jar
+          cd docker
+          chmod +x ./copy.sh
+          ./copy.sh
           
 
       - name: Setup SSH and SCP
