@@ -8,14 +8,12 @@ usage() {
 
 
 # copy sql
-echo "begin copy sql "
-cp ../sql/rostest.sql ./mysql/db
-# cp ../sql/ry_20230706.sql ./mysql/db
-# cp ../sql/ry_config_20220929.sql ./mysql/db
+# echo "begin copy sql "
+# cp ../sql/rostest.sql ./mysql/db
 
 # copy html
-echo "begin copy html "
-cp -r ../Restaurant_Order_System_Frontend/dist/** ./nginx/html/dist
+# echo "begin copy html "
+# cp -r ../Restaurant_Order_System_Frontend/dist/** ./nginx/html/dist
 
 
 # copy jar
