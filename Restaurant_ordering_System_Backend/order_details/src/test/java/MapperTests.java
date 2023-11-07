@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +30,26 @@ public class MapperTests {
     public void testSelectOrderDetailsList() {
         List<OrderDetails> order_detailsList = order_detailsMapper.selectOrderDetailsList(new OrderDetails());
         System.out.println(order_detailsList);
+    }
+    @Test
+    public void testInsertOrderDetail(){
+        OrderDetails newOrderDetail = new OrderDetails();
+        newOrderDetail.setOrderId(2L); //
+        newOrderDetail.setItemId(2L); // 设置order_details name的值
+        newOrderDetail.setQuantity(6L);
+
+        int insert = order_detailsMapper.insertOrderDetails(newOrderDetail);
+        System.out.println(insert);
+    }
+
+    @Test
+    public void testUpdateOrderDetail(){
+        OrderDetails updateOrderDetail = new OrderDetails();
+        updateOrderDetail.setOrderId(2L); //
+        updateOrderDetail.setItemId(2L); // 设置order_details name的值
+        updateOrderDetail.setQuantity(6L);
+        int update = order_detailsMapper.updateOrderDetails(updateOrderDetail);
+        System.out.println(update);
     }
 
 }
