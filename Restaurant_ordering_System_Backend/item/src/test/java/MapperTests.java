@@ -13,6 +13,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import static junit.framework.TestCase.assertNotNull;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ItemApplication.class)
 @MapperScan(basePackages = "com.ruoyi.item.mapper")
@@ -26,12 +28,14 @@ public class MapperTests {
     @Test
     public void testSelectItemById() {
         Item item = itemMapper.selectItemByItemId(1L);
+        assertNotNull(item);
         System.out.println(item);
     }
 
     @Test
     public void testSelectItemList() {
         List<Item> itemList = itemMapper.selectItemList(new Item());
+        assertNotNull(itemList);
         System.out.println(itemList);
     }
 

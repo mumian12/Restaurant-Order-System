@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static junit.framework.TestCase.assertNotNull;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = OrdersApplication.class)
 @MapperScan(basePackages = "com.ruoyi.orders.mapper")
@@ -25,12 +27,14 @@ public class MapperTests {
     @Test
     public void testSelectOrdersById() {
         Orders orders = ordersMapper.selectOrdersByOrderId(1L);
+        assertNotNull(orders); // 验证 orders 对象不为空
         System.out.println(orders);
     }
 
     @Test
     public void testSelectOrdersList() {
         List<Orders> ordersList = ordersMapper.selectOrdersList(new Orders());
+        assertNotNull(ordersList);
         System.out.println(ordersList);
     }
 

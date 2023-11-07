@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import static junit.framework.TestCase.assertNotNull;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = OrderDetailsApplication.class)
 @MapperScan(basePackages = "com.ruoyi.order_details.mapper")
@@ -23,12 +25,16 @@ public class MapperTests {
     @Test
     public void testSelectOrderDetailsById() {
         OrderDetails order_details = order_detailsMapper.selectOrderDetailsByDetailId(1L);
+        assertNotNull(order_details);
+
         System.out.println(order_details);
     }
 
     @Test
     public void testSelectOrderDetailsList() {
         List<OrderDetails> order_detailsList = order_detailsMapper.selectOrderDetailsList(new OrderDetails());
+        assertNotNull(order_detailsList);
+
         System.out.println(order_detailsList);
     }
     @Test
